@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learnly — End-to-End System Flow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 40%, #0d1333 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 30px 40px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+
+        .diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* ───── TIER ───── */
+        .tier {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 20px 24px;
+            position: relative;
+        }
+        .tier-label {
+            position: absolute;
+            top: -12px;
+            left: 24px;
+            background: #1a1f4e;
+            padding: 2px 14px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        /* ───── USERS ROW ───── */
+        .users-row {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            margin-bottom: 6px;
+        }
+        .user-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .user-icon {
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+        .user-icon.admin { background: linear-gradient(135deg, #ef4444, #f97316); }
+        .user-icon.teacher { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
+        .user-icon.student { background: linear-gradient(135deg, #06b6d4, #3b82f6); }
+        .user-name { font-weight: 700; font-size: 0.85rem; }
+        .user-desc { font-size: 0.65rem; color: #94a3b8; text-align: center; max-width: 140px; }
+
+        /* ───── ARROW ───── */
+        .arrow-down {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 4px 0;
+        }
+        .arrow-down .line {
+            width: 2px;
+            height: 16px;
+            background: rgba(255,255,255,0.25);
+        }
+        .arrow-down .head {
+            width: 0; height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid rgba(255,255,255,0.25);
+        }
+        .arrow-label {
+            font-size: 0.6rem;
+            color: #94a3b8;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin: 2px 0;
+        }
+
+        /* ───── BOX GRID ───── */
+        .box-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .box {
+            border-radius: 12px;
+            padding: 14px 18px;
+            min-width: 170px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .box-title {
+            font-weight: 700;
+            font-size: 0.82rem;
+            margin-bottom: 4px;
+        }
+        .box-sub {
+            font-size: 0.62rem;
+            color: #cbd5e1;
+            line-height: 1.4;
+        }
+
+        /* Frontend boxes */
+        .box.frontend { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.3); }
+        .box.frontend .box-title { color: #60a5fa; }
+
+        /* Backend API boxes */
+        .box.api { background: rgba(139,92,246,0.12); border-color: rgba(139,92,246,0.3); }
+        .box.api .box-title { color: #a78bfa; }
+
+        /* AI service boxes */
+        .box.ai { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.3); }
+        .box.ai .box-title { color: #34d399; }
+
+        /* Data boxes */
+        .box.data { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3); }
+        .box.data .box-title { color: #fbbf24; }
+
+        /* ───── FLOW SECTION ───── */
+        .flows {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 4px;
+        }
+        .flow-card {
+            border-radius: 12px;
+            padding: 16px 20px;
+            border: 1px solid;
+        }
+        .flow-card h3 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .flow-card h3 .dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .flow-steps {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .flow-step {
+            background: rgba(0,0,0,0.25);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.62rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .flow-arrow {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.4);
+        }
+
+        .flow-card.blue { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.25); }
+        .flow-card.blue h3 { color: #60a5fa; }
+        .flow-card.blue .dot { background: #3b82f6; }
+
+        .flow-card.green { background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.25); }
+        .flow-card.green h3 { color: #34d399; }
+        .flow-card.green .dot { background: #10b981; }
+
+        .flow-card.orange { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.25); }
+        .flow-card.orange h3 { color: #fbbf24; }
+        .flow-card.orange .dot { background: #f59e0b; }
+
+        .flow-card.pink { background: rgba(244,114,182,0.08); border-color: rgba(244,114,182,0.25); }
+        .flow-card.pink h3 { color: #f472b6; }
+        .flow-card.pink .dot { background: #ec4899; }
+
+        /* ───── PIPELINE ───── */
+        .pipeline {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .pipe-step {
+            background: rgba(16,185,129,0.15);
+            border: 1px solid rgba(16,185,129,0.3);
+            border-radius: 8px;
+            padding: 8px 14px;
+            text-align: center;
+        }
+        .pipe-step .pipe-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #34d399;
+        }
+        .pipe-step .pipe-desc {
+            font-size: 0.58rem;
+            color: #94a3b8;
+        }
+        .pipe-arrow {
+            font-size: 1.1rem;
+            color: rgba(16,185,129,0.5);
+        }
+
+        /* ───── SECURITY BADGE ───── */
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(239,68,68,0.12);
+            border: 1px solid rgba(239,68,68,0.3);
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #fca5a5;
+        }
+
+        .tier-content-label {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        @media print {
+            body { padding: 10px; background: #0a0e27; }
+            .tier { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎓 Learnly — End-to-End System Flow</h1>
+    <p class="subtitle">AI-Powered Learning Management System &nbsp;|&nbsp; Final Year Project</p>
+
+    <div class="diagram">
+
+        <!-- ═══════ TIER 1: USERS ═══════ -->
+        <div class="tier">
+            <div class="tier-label" style="color:#60a5fa;">👤 Presentation Layer</div>
+            <div class="users-row">
+                <div class="user-card">
+                    <div class="user-icon admin">👑</div>
+                    <div class="user-name">Admin</div>
+                    <div class="user-desc">Manage users, courses, departments, moderation</div>
+                </div>
+                <div class="user-card">
+                    <div class="user-icon teacher">📚</div>
+                    <div class="user-name">Teacher</div>
+                    <div class="user-desc">Create courses, upload materials, generate quizzes</div>
+                </div>
+                <div class="user-card">
+                    <div class="user-icon student">🎓</div>
+                    <div class="user-name">Student</div>
+                    <div class="user-desc">Enroll, take adaptive quizzes, chat with AI tutor</div>
+                </div>
+            </div>
+
+            <div class="arrow-down">
+                <div class="line"></div>
+                <div class="head"></div>
+            </div>
+            <div style="text-align:center;">
+                <span class="security-badge">🔒 Google OAuth 2.0 &nbsp;/&nbsp; JWT Authentication &nbsp;/&nbsp; Role-Based Access</span>
+            </div>
+            <div class="arrow-down">
+                <div class="line"></div>
+                <div class="head"></div>
+            </div>
+
+            <div class="box-grid">
+                <div class="box frontend">
+                    <div class="box-title">⚛️ React + Vite Frontend</div>
+                    <div class="box-sub">Landing Page &bull; Role-Based Dashboards<br>AI Chat UI &bull; Quiz Interface &bull; Analytics</div>
+                </div>
+                <div class="box frontend">
+                    <div class="box-title">🗂️ Zustand State</div>
+                    <div class="box-sub">Auth Store (user, token)<br>Persistent across reloads</div>
+                </div>
+                <div class="box frontend">
+                    <div class="box-title">🔌 Axios API Client</div>
+                    <div class="box-sub">JWT Interceptor<br>Auto token attachment</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="arrow-down">
+            <div class="line" style="height:12px;"></div>
+            <div class="head"></div>
+            <div class="arrow-label">REST API (HTTP/JSON) — Port 8000</div>
+        </div>
+
+        <!-- ═══════ TIER 2: BACKEND ═══════ -->
+        <div class="tier">
+            <div class="tier-label" style="color:#a78bfa;">⚙️ Backend API Layer (FastAPI + Python 3.11)</div>
+            <div class="box-grid" style="margin-top:8px;">
+                <div class="box api">
+                    <div class="box-title">🔐 Auth API</div>
+                    <div class="box-sub">Login &bull; Signup &bull; Google OAuth<br>Email Verify &bull; Password Reset</div>
+                </div>
+                <div class="box api">
+                    <div class="box-title">📖 Courses API</div>
+                    <div class="box-sub">CRUD &bull; Enroll Students<br>Upload &amp; Index Materials</div>
+                </div>
+                <div class="box api">
+                    <div class="box-title">📝 Quiz API</div>
+                    <div class="box-sub">AI Generate &bull; Attempt &bull; Grade<br>Retakes &bull; Adaptive Difficulty</div>
+                </div>
+                <div class="box api">
+                    <div class="box-title">🤖 RAG API</div>
+                    <div class="box-sub">AI Chat Queries<br>Context-Aware Answers</div>
+                </div>
+                <div class="box api">
+                    <div class="box-title">📊 Analytics API</div>
+                    <div class="box-sub">Student Progress &bull; Course Stats<br>Platform Metrics</div>
+                </div>
+                <div class="box api">
+                    <div class="box-title">🛡️ Moderation API</div>
+                    <div class="box-sub">Content Safety Checks<br>Settings &amp; Logs</div>
+                </div>
+                <div class="box api">
+                    <div class="box-title">🏢 Departments API</div>
+                    <div class="box-sub">Dept CRUD<br>Semester Config</div>
+                </div>
+                <div class="box api">
+                    <div class="box-title">📋 Assignments API</div>
+                    <div class="box-sub">Create &bull; Submit<br>Grade &bull; Feedback</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="arrow-down">
+            <div class="line" style="height:12px;"></div>
+            <div class="head"></div>
+            <div class="arrow-label">Service Layer — Business Logic &amp; AI Integration</div>
+        </div>
+
+        <!-- ═══════ TIER 3: AI & DATA ═══════ -->
+        <div class="tier">
+            <div class="tier-label" style="color:#34d399;">🧠 AI &amp; Data Layer</div>
+
+            <div class="tier-content-label" style="color:#34d399;">Document Processing Pipeline</div>
+            <div class="pipeline">
+                <div class="pipe-step">
+                    <div class="pipe-title">📄 Upload</div>
+                    <div class="pipe-desc">PDF, DOCX, PPTX,<br>XLSX, TXT</div>
+                </div>
+                <div class="pipe-arrow">→</div>
+                <div class="pipe-step">
+                    <div class="pipe-title">🔍 Parse</div>
+                    <div class="pipe-desc">DocumentParser<br>Text + Tables + Images</div>
+                </div>
+                <div class="pipe-arrow">→</div>
+                <div class="pipe-step">
+                    <div class="pipe-title">✂️ Chunk</div>
+                    <div class="pipe-desc">AdaptiveChunker<br>400-1800 chars</div>
+                </div>
+                <div class="pipe-arrow">→</div>
+                <div class="pipe-step">
+                    <div class="pipe-title">🔢 Embed</div>
+                    <div class="pipe-desc">HuggingFace API<br>BGE-small (384-dim)</div>
+                </div>
+                <div class="pipe-arrow">→</div>
+                <div class="pipe-step">
+                    <div class="pipe-title">💾 Store</div>
+                    <div class="pipe-desc">FAISS Vector Index<br>Per-Course on Disk</div>
+                </div>
+            </div>
+
+            <div style="height:16px;"></div>
+
+            <div class="box-grid">
+                <div class="box ai">
+                    <div class="box-title">🤖 Groq Cloud</div>
+                    <div class="box-sub">Llama 3.1-8b-instant<br>Chat &bull; Quiz Gen &bull; JSON mode</div>
+                </div>
+                <div class="box ai">
+                    <div class="box-title">🔢 HuggingFace</div>
+                    <div class="box-sub">BGE-small-en-v1.5<br>Text → 384-dim Vectors</div>
+                </div>
+                <div class="box ai">
+                    <div class="box-title">🔎 FAISS</div>
+                    <div class="box-sub">Facebook AI Similarity Search<br>Cosine Similarity &bull; Per-Course</div>
+                </div>
+                <div class="box data">
+                    <div class="box-title">🍃 MongoDB Atlas</div>
+                    <div class="box-sub">17 Collections via Beanie ODM<br>Users &bull; Courses &bull; Quizzes<br>Chat &bull; Analytics &bull; Moderation</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ TIER 4: KEY FLOWS ═══════ -->
+        <div class="tier">
+            <div class="tier-label" style="color:#fbbf24;">🔄 Key End-to-End Flows</div>
+            <div class="flows">
+                <div class="flow-card blue">
+                    <h3><span class="dot"></span>📄 Material Indexing Flow</h3>
+                    <div class="flow-steps">
+                        <span class="flow-step">Teacher uploads file</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">DocumentParser extracts text</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">AdaptiveChunker splits</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">HuggingFace embeds</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">FAISS stores vectors</span>
+                    </div>
+                </div>
+
+                <div class="flow-card green">
+                    <h3><span class="dot"></span>💬 AI Chat (RAG) Flow</h3>
+                    <div class="flow-steps">
+                        <span class="flow-step">Student asks question</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">Moderation check</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">Embed query</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">FAISS similarity search</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">Groq LLM + context → answer</span>
+                    </div>
+                </div>
+
+                <div class="flow-card orange">
+                    <h3><span class="dot"></span>📝 Quiz Generation Flow</h3>
+                    <div class="flow-steps">
+                        <span class="flow-step">Teacher selects materials</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">Fetch material text</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">Groq generates MCQs (JSON)</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">Normalize &amp; validate</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">Store in MongoDB</span>
+                    </div>
+                </div>
+
+                <div class="flow-card pink">
+                    <h3><span class="dot"></span>🎯 Adaptive Quiz Flow</h3>
+                    <div class="flow-steps">
+                        <span class="flow-step">Student opens quiz</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">Check competency score</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">Determine difficulty tier</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">Regenerate personalized Qs</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-step">Grade &amp; update score</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ TIER 5: DEPLOYMENT ═══════ -->
+        <div class="tier">
+            <div class="tier-label" style="color:#f472b6;">🚀 Deployment</div>
+            <div class="box-grid">
+                <div class="box" style="background:rgba(244,114,182,0.1); border-color:rgba(244,114,182,0.3);">
+                    <div class="box-title" style="color:#f472b6;">🐳 Docker Compose</div>
+                    <div class="box-sub">Frontend Container (Port 3000)<br>Backend Container (Port 8000)<br>Shared .env configuration</div>
+                </div>
+                <div class="box" style="background:rgba(244,114,182,0.1); border-color:rgba(244,114,182,0.3);">
+                    <div class="box-title" style="color:#f472b6;">☁️ Cloud Services</div>
+                    <div class="box-sub">MongoDB Atlas &bull; Groq Cloud<br>HuggingFace API &bull; Google OAuth</div>
+                </div>
+                <div class="box" style="background:rgba(244,114,182,0.1); border-color:rgba(244,114,182,0.3);">
+                    <div class="box-title" style="color:#f472b6;">🔧 Tech Stack</div>
+                    <div class="box-sub">React 18 + Vite &bull; FastAPI<br>Python 3.11 &bull; Beanie ODM<br>FAISS &bull; Llama 3.1</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
