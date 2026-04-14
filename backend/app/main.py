@@ -26,14 +26,22 @@ app = FastAPI(
 )
 
 # CORS middleware
+origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+    settings.FRONTEND_URL,
+]
+
+# Add a wildcard for Render subdomains to be safer during deployment
+if "onrender.com" in settings.FRONTEND_URL:
+    # This allows variations if the user changes the name
+    origins.append(settings.FRONTEND_URL.replace("https://", "http://"))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173"
-    ],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
